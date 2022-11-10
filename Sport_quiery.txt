@@ -1,0 +1,167 @@
+Задание 1
+
+select firstname, lastname, bibnumber, countrycode
+from registrationevent
+inner join
+    (select firstname, lastname, countrycode, registrationid
+	from registration
+	inner join
+        (select firstname, lastname, countrycode, runnerid
+		from "user"
+		inner join runner on "user".email = runner.email) as task1
+	on task1.runnerid = registration.runnerid) as task2
+on task2.registrationid = registrationevent.registrationid;
+
+
+Задание 2 
+
+select gender, ('2022-10-22 16:28:09.0000' - dateofbirth) as age, eventname
+from "event"
+inner join
+	(select gender, dateofbirth, eventid, registrationstatusid
+	from registrationevent
+	inner join
+		(select gender, dateofbirth, registrationid, registrationstatusid
+		from registration
+		inner join
+			(select gender, dateofbirth, runnerid
+			from gender
+			inner join runner on gender.gender_id = runner.gender_id) as task1
+		on registration.runnerid = task1.runnerid) as task2
+	on task2.registrationid = registrationevent.registrationid) as task3
+on task3.eventid = "event".eventid
+where registrationstatusid = 4;  
+ 
+
+Задание 3
+
+select marathonname, eventname, racetime
+from marathon
+inner join
+	(select gender_id, racetime, eventname, marathonid
+	from "event"
+	inner join
+		(select gender_id, racetime, eventid
+		from registrationevent
+		inner join
+			(select gender_id, registrationid
+			from registration
+			inner join runner on runner.runnerid = registration.runnerid) as task1
+		on task1.registrationid = registrationevent.registrationid) as task2
+	on task2.eventid = "event".eventid) as task3
+on task3.marathonid = marathon.marathonid
+where gender_id=1;
+
+select marathonname, eventname, racetime
+from marathon
+inner join
+	(select gender_id, racetime, eventname, marathonid
+	from "event"
+	inner join
+		(select gender_id, racetime, eventid
+		from registrationevent
+		inner join
+			(select gender_id, registrationid
+			from registration
+			inner join runner on runner.runnerid = registration.runnerid) as task1
+		on task1.registrationid = registrationevent.registrationid) as task2
+	on task2.eventid = "event".eventid) as task3
+on task3.marathonid = marathon.marathonid
+where gender_id=2;
+
+
+Задание 4 !!!
+
+select lastname, firstname, countrycode, ('2022-10-22 16:28:09.0000' - dateofbirth) as age, startdatetime, racetime, eventtypename, marathonname
+from eventtype
+inner join
+	(select lastname, firstname, task4.countrycode, dateofbirth, registrationstatusid, racetime, startdatetime, marathonname, eventtypeid
+	from marathon
+	inner join
+		(select lastname, firstname, countrycode, dateofbirth, registrationstatusid, racetime, startdatetime, marathonid, eventtypeid
+		from "event"
+		inner join
+			(select lastname, firstname, countrycode, dateofbirth, registrationstatusid, racetime, eventid
+			from registrationevent
+			inner join
+				(select lastname, firstname, countrycode, dateofbirth, registrationstatusid, registrationid
+				from registration
+				inner join
+					(select lastname, firstname, countrycode, dateofbirth, runnerid
+					from "user"
+					inner join runner on "user".email = runner.email) as task1
+				on task1.runnerid = registration.runnerid) as task2
+			on task2.registrationid = registrationevent.registrationid) as task3
+		on task3.eventid = "event".eventid) as task4 on task4.marathonid = marathon.marathonid) as task5
+	on task5.eventtypeid = eventtype.eventtypeid
+where registrationstatusid=4;
+
+select avg(racetime) as average_time
+from
+    (select racetime, registrationstatusid
+	from registration
+	inner join registrationevent on registration.registrationid = registrationevent.registrationid) as task1
+where registrationstatusid = 4;
+
+
+Задание 5
+
+select lastname, firstname, email, registrationstatus, eventtypename
+from
+	(select lastname, firstname, email, registrationstatus, eventtypename
+	from eventtype
+	inner join
+		(select lastname, firstname, email, registrationstatus, eventtypeid
+		from "event"
+		inner join
+			(select lastname, firstname, email, registrationstatus, eventid
+			from registrationevent
+			inner join
+				(select lastname, firstname, email, registrationstatus, registrationid
+				from registrationstatus
+				inner join
+					(select lastname, firstname, email, registrationstatusid, registrationid
+					from registration
+					inner join
+						(select lastname, firstname, runner.email, runnerid
+						from "user"
+						inner join runner on "user".email = runner.email) as task1
+					on task1.runnerid = registration.runnerid) as task2
+				on task2.registrationstatusid = registrationstatus.registrationstatusid) as task2
+			on task2.registrationid = registrationevent.registrationid) as task3
+		on task3.eventid = "event".eventid) as task4
+	on task4.eventtypeid = eventtype.eventtypeid) as task5
+where lastname =
+and firstname =
+and email =
+and registrationstatus =
+and eventtypename =;
+
+
+Задание 6
+
+select charityname, count(sponsorname) as sponsors, sum(amount) as donated
+from charity
+inner join
+	(select sponsorname, amount, charityid
+	from registration
+	inner join sponsorship on registration.registrationid = sponsorship.registrationid) as task1
+on task1.charityid = charity.charityid
+group by charityname;
+
+Задание 7
+
+select "password", dateofbirth, registrationdatetime, coalesce(runnerid) as runnerid, coalesce(email) as email, coalesce(gender_id) as gender_id, coalesce(countrycode) as counrycode
+from
+	(select "password", dateofbirth, registration.registrationdatetime, task1.runnerid, email, gender_id, countrycode
+	from registration
+	inner join 
+		(select "user"."password", runner.runnerid, runner.email, runner.gender_id, runner.dateofbirth, runner.countrycode
+		from "user"
+		inner join runner on "user".email = runner.email) as task1
+	on registration.runnerid = task1.runnerid) as task2
+where "password" ~ '%______%[A-Z][0-9]!|@|#|$|%|^'
+and (registrationdatetime - dateofbirth) > '3650 days';
+
+
+Задание *
